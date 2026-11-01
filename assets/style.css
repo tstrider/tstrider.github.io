@@ -1,0 +1,521 @@
+/* thomaskstrider.com. One stylesheet for every page: the home page, the tools page, and the shell later pages use.
+   Shell colors: brand/BRAND.md. Each window wears its own product's colors.
+
+   Fonts. Safari will not use a font the visitor installed, so nothing here asks for one.
+   - Body text is Montserrat, served from this folder (SIL Open Font License, fonts/OFL.txt). It has its own
+     family name, so an installed copy can never stand in for it.
+   - Every Coolvetica line is outline artwork: inline SVG paths drawn by build/letters.py. No Coolvetica
+     file is served, because its license does not cover embedding in a website. */
+@font-face { font-family: "TS Montserrat"; src: url("fonts/montserrat.woff2?v=7") format("woff2"); font-weight: 400 700; font-style: normal; font-display: swap; }
+
+:root {
+  --black: #060B0E;
+  --navy: #1B2938;
+  --cream: #F2EEE3;
+  --yellow: #FBA936;   /* a fill only. Never text or a thin line on a light surface. */
+  --white: #FFFFFF;
+  --slate: #5F6673;    /* small labels on cream or white: 5.0:1 or better */
+  --body: "TS Montserrat", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --out: cubic-bezier(.2, .7, .2, 1);
+  /* --s is the page unit: one hundredth of the content column. The column follows the screen up to
+     1360 px. Past that it grows slowly (1413 at 1920 wide, 1522 at 2240) and never passes 1700, so on a
+     wide screen nothing a visitor reads runs from edge to edge, and the page does not look small either.
+     It is also held back on short screens, so the first screen stays one screen. */
+  --s: min(1vw, 1.8vh, clamp(13.6px, calc(.34vw + 7.6px), 17px));
+  --col: calc(var(--s) * 100);
+  --gutter: max(0px, calc((100vw - var(--col)) / 2));   /* the calm space beside the column */
+  --menu-h: max(52px, calc(var(--s) * 4));
+}
+@supports (height: 1svh) { :root { --s: min(1vw, 1.8svh, clamp(13.6px, calc(.34vw + 7.6px), 17px)); } }
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--black); color: var(--cream); font-family: var(--body); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+img, svg { display: block; }
+a { color: inherit; text-decoration: none; }
+h1, h2, h3, p, dl, dd, ul { margin: 0; font-weight: 400; }
+ul { padding: 0; list-style: none; }
+button { font: inherit; color: inherit; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+/* A heading's letters, as artwork. One SVG per phrase, one em tall, sitting on the text baseline.
+   The real words sit beside it in a .sr span. Its color is the text color. */
+.ltr { display: inline-block; height: 1em; vertical-align: -.233em; fill: currentColor; overflow: visible; }
+/* A line breaks between phrases, never inside one. */
+.ph { display: inline-block; white-space: nowrap; }
+/* A small label for the kind of thing a build is. */
+.kind { font: 600 12px/1.4 var(--body); letter-spacing: .12em; text-transform: uppercase; text-wrap: balance; }
+/* A section's headline. */
+.head { font-size: clamp(30px, calc(var(--s) * 3.5), 70px); line-height: 1.1; text-align: center; }
+/* His cube pattern, as a strip along an edge. The brand file is the mask, so the strip takes any color. */
+.strip {
+  height: clamp(26px, calc(var(--s) * 2.5), 40px); background: var(--strip, var(--navy));
+  -webkit-mask: url("pattern-strip.svg?v=7") 50% 50% / auto 100% repeat-x; mask: url("pattern-strip.svg?v=7") 50% 50% / auto 100% repeat-x;
+}
+/* Sections rise into view, once. Only what waits below the screen is held back, and only when motion is on. */
+.motion .rise.is-waiting { opacity: 0; transform: translateY(18px); }
+.motion .rise { transition: opacity .5s var(--out), transform .5s var(--out); }
+/* A little noise, so the dark fields do not band. */
+.grain { position: absolute; inset: 0; z-index: -1; pointer-events: none; background: url("grain.png?v=7") 0 0 / 96px 96px; opacity: .5; }
+
+/* ───────── Menu ───────── */
+.menu {
+  position: absolute; z-index: 10; top: 0; left: 0; right: 0;
+  height: var(--menu-h); padding: 0 calc(var(--gutter) + max(20px, var(--s) * 2.6));   /* the menu keeps to the column too */
+  display: flex; align-items: center; justify-content: space-between;
+}
+.menu-mark { display: grid; place-items: center; width: 44px; height: 44px; margin-left: -8px; }
+.menu-mark svg { height: 30px; width: auto; fill: var(--cream); }
+.menu-links { display: flex; gap: 4px; margin-right: -14px; }
+.menu-links a {
+  display: grid; place-items: center; min-height: 44px; padding: 0 14px;
+  font: 600 clamp(12px, calc(var(--s) * .84), 14px)/1 var(--body); letter-spacing: .16em; text-transform: uppercase;
+  color: rgba(242, 238, 227, .78); transition: color .15s var(--out);
+}
+.menu-links a[aria-current="page"], .menu-links a:hover { color: var(--cream); }
+a:focus-visible, button:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; border-radius: 6px; }
+
+/* ───────── The first screen: his name, his photo, his title. One centered axis. ───────── */
+.hero {
+  position: relative; isolation: isolate; overflow: clip;
+  min-height: 72vh; padding-top: var(--menu-h); display: flex; flex-direction: column;   /* shorter than the screen, so the next section shows below it */
+  background: linear-gradient(180deg, var(--black) 0%, #091016 26%, #0F1922 54%, #0A1117 82%, var(--black) 100%);
+}
+@supports (height: 1svh) { .hero { min-height: 72svh; } }
+/* One light, from above the screen. It falls in a soft cone and dies out below him. */
+.hero::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: conic-gradient(from 180deg at 50% -34%,
+    rgba(150, 172, 198, .26) 0deg, rgba(128, 150, 176, .2) 12deg, rgba(96, 118, 144, .09) 23deg, transparent 33deg,
+    transparent 327deg, rgba(96, 118, 144, .09) 337deg, rgba(128, 150, 176, .2) 348deg, rgba(150, 172, 198, .26) 360deg);
+  -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, .5) 0%, #000 34%, rgba(0, 0, 0, .7) 60%, transparent 92%);
+          mask-image: linear-gradient(180deg, rgba(0, 0, 0, .5) 0%, #000 34%, rgba(0, 0, 0, .7) 60%, transparent 92%);
+}
+/* On a screen wider than the column, the stage falls into the dark beside it, so the wide sides read as wings. */
+@media (min-width: 1480px) {
+  .hero::after, .stage > .wings, .band::after {
+    content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+    background: linear-gradient(90deg, #04080A 0%, rgba(4, 8, 10, .5) calc(var(--gutter) * .6), transparent calc(var(--gutter) + 10%), transparent calc(100% - var(--gutter) - 10%), rgba(4, 8, 10, .5) calc(100% - var(--gutter) * .6), #04080A 100%);
+  }
+}
+.hero-show { flex: 1; display: flex; flex-direction: column; align-items: center; }
+/* Spare height splits above and below. The larger share sits below, so the name rides a little high. */
+.hero-show::before { content: ""; flex: 1 1 0; }
+.hero-show::after { content: ""; flex: 1.45 1 0; }
+
+.marquee {
+  --word-h: calc(var(--s) * 8.4);
+  position: relative; width: 100%;
+}
+/* One soft light on the wall behind his name. */
+.marquee::before {
+  content: ""; position: absolute; left: 50%; top: 50%; width: 100vw; height: calc(var(--s) * 60);
+  margin: calc(var(--s) * -30) 0 0 -50vw; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(ellipse 24% 38% at 50% 50%, rgba(132, 152, 176, .30), transparent 72%),
+    radial-gradient(ellipse 58% 46% at 50% 52%, rgba(58, 78, 100, .5), transparent 74%);
+}
+.name {
+  margin: 0; padding: calc(var(--s) * 2) 0;
+  display: flex; justify-content: center; align-items: center; gap: calc(var(--word-h) * .371);   /* the gap his wordmark is drawn with */
+  /* lit from above the middle: the far letters and the feet of the letters sit a little out of the light */
+  -webkit-mask-image: radial-gradient(ellipse 52% 160% at 50% 50%, #000 40%, rgba(0, 0, 0, .58) 100%), linear-gradient(180deg, #000 34%, rgba(0, 0, 0, .8) 72%);
+          mask-image: radial-gradient(ellipse 52% 160% at 50% 50%, #000 40%, rgba(0, 0, 0, .58) 100%), linear-gradient(180deg, #000 34%, rgba(0, 0, 0, .8) 72%);
+  -webkit-mask-composite: source-in; mask-composite: intersect;
+}
+.word { height: var(--word-h); width: auto; fill: var(--cream); overflow: visible;
+  /* letters standing off the wall: their shadow falls below them */
+  filter: drop-shadow(0 calc(var(--s) * .5) calc(var(--s) * .55) rgba(3, 6, 8, .6)); }
+
+/* His title, in the brand's heading style: Coolvetica capitals, set wide. The capitals and the spacing are in the artwork. */
+.title {
+  position: relative; z-index: 2; margin-top: calc(var(--s) * 1.2); text-align: center; padding: 0 20px;
+  font-size: clamp(15px, calc(var(--s) * 1.9), 38px); line-height: 1.3; word-spacing: .3em; color: var(--cream);   /* the gap between phrases matches the wide spaces inside them */
+}
+
+/* A short yellow rule: the one accent on the first screen. */
+.rule { display: block; width: calc(var(--s) * 4.6); min-width: 44px; height: 3px; border-radius: 2px; margin-top: calc(var(--s) * 2.3); background: var(--yellow); }
+/* What he does, in one line. */
+.line {
+  position: relative; z-index: 2; margin-top: calc(var(--s) * 2.1); padding: 0 20px; text-align: center;
+  font: 400 clamp(16px, calc(var(--s) * 1.55), 27px)/1.45 var(--body); letter-spacing: .005em; color: rgba(242, 238, 227, .86);
+}
+/* A floor of his cube pattern at the foot of the screen. It fades up into the dark, and no words sit on it. */
+.floor {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 24%; z-index: -1; pointer-events: none;
+  background: #2D3A48;
+  -webkit-mask: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, .5) 55%, #000 100%), url("pattern-block.svg?v=1") 50% 100% / calc(var(--s) * 13) auto repeat;
+          mask: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, .5) 55%, #000 100%), url("pattern-block.svg?v=1") 50% 100% / calc(var(--s) * 13) auto repeat;
+  -webkit-mask-composite: source-in; mask-composite: intersect;
+}
+
+/* ───────── The builds ─────────
+   Each build's own colors: frame, ink, and its light. */
+.win[data-build="tickandtie"], .row[data-build="tickandtie"]  { --frame: #0F3B2E; --frame-2: #0A2A21; --ink: #F7F2E5; --screen: #FBF8EF; }
+.win[data-build="datadecks"], .row[data-build="datadecks"]   { --frame: #1C2C55; --frame-2: #0D1423; --ink: #EEF2F8; --screen: #17233D; }
+.win[data-build="horsesmouth"], .row[data-build="horsesmouth"] { --frame: #1D1740; --frame-2: #0C0B16; --ink: #FBFBF8; --screen: #12121B; }
+.win[data-build="shotcaller"], .row[data-build="shotcaller"]  { --frame: #0A62EC; --frame-2: #0A4FD0; --ink: #FFFFFF; --screen: #EAF1FF; }
+.win[data-build="banger"], .row[data-build="banger"]      { --frame: #15151C; --frame-2: #07070A; --ink: #F5F5F7; --screen: #07070A; }
+.win[data-build="tickandtie"],  .dot[data-build="tickandtie"],  .stage[data-on="tickandtie"]  { --glow: #1F8F5E; }
+.win[data-build="datadecks"],   .dot[data-build="datadecks"],   .stage[data-on="datadecks"]   { --glow: #2F5BEA; }
+.win[data-build="horsesmouth"], .dot[data-build="horsesmouth"], .stage[data-on="horsesmouth"] { --glow: #7C5CFF; }
+.win[data-build="shotcaller"],  .dot[data-build="shotcaller"],  .stage[data-on="shotcaller"]  { --glow: #0A6CFF; }
+.win[data-build="banger"],      .dot[data-build="banger"]       { --glow: #0DD9BF; }
+/* Banger's teal is bright. On the wall it runs deeper, so the words above it keep 7:1. */
+.stage[data-on="banger"]        { --glow: #0B8A7C; }
+/* Registered as a color, so the light can fade from one build's color to the next. */
+@property --glow { syntax: "<color>"; inherits: true; initial-value: #1F8F5E; }
+
+.stage {
+  position: relative; isolation: isolate; overflow: clip;
+  min-height: 100vh; padding: calc(var(--s) * 4.4) 0 calc(var(--s) * 2.6); display: flex; flex-direction: column; align-items: center;
+  background: linear-gradient(180deg, var(--black) 0%, #0A1118 22%, #142029 52%, #0E161E 74%, var(--black) 100%);
+}
+@supports (height: 1svh) { .stage { min-height: 100svh; } }
+.motion .stage { transition: --glow .5s var(--out); }
+.stage::before { content: ""; flex: 1 1 0; }
+.stage::after { content: ""; flex: 1 1 0; }
+
+.say {
+  position: relative; z-index: 2; padding: 0 20px; text-align: center;
+  font-size: clamp(26px, calc(var(--s) * 3.5), 70px); line-height: 1.1; color: var(--cream);
+}
+
+/* Every window is the same box. data-pos places it: 0 is on stage, the rest stand behind.
+   Only transform and opacity change between places. */
+.lineup {
+  --fw: calc(var(--s) * 29);
+  --pad: calc(var(--fw) * .019);
+  --plate: calc(var(--fw) * .106);
+  --fh: calc(var(--pad) + (var(--fw) - 2 * var(--pad)) / 1.6 + var(--plate));
+  --says-h: calc(var(--s) * 1.3 + 128px);   /* room under the windows for the words about the build on stage */
+  position: relative; width: 100%; height: var(--fh); margin-top: calc(var(--s) * 4);
+  margin-bottom: var(--says-h);
+}
+/* The window on stage throws its light up the wall. */
+.lineup::before {
+  content: ""; position: absolute; left: 50%; bottom: calc(var(--fh) * .8); width: 100vw; height: calc(var(--s) * 34); margin-left: -50vw; z-index: -1; pointer-events: none;
+  background: conic-gradient(from 0deg at 50% 100%,
+    color-mix(in srgb, var(--glow) 44%, transparent) 0deg, color-mix(in srgb, var(--glow) 32%, transparent) 34deg,
+    color-mix(in srgb, var(--glow) 14%, transparent) 58deg, transparent 72deg, transparent 288deg,
+    color-mix(in srgb, var(--glow) 14%, transparent) 302deg, color-mix(in srgb, var(--glow) 32%, transparent) 326deg,
+    color-mix(in srgb, var(--glow) 44%, transparent) 360deg);
+  -webkit-mask-image: radial-gradient(ellipse 70% 100% at 50% 100%, #000 6%, rgba(0, 0, 0, .5) 44%, transparent 90%);
+          mask-image: radial-gradient(ellipse 70% 100% at 50% 100%, #000 6%, rgba(0, 0, 0, .5) 44%, transparent 90%);
+}
+/* The floor the windows stand on. */
+.lineup::after {
+  content: ""; position: absolute; left: 50%; margin-left: -50vw; width: 100vw; top: calc(100% - var(--fw) * .3); height: 70vh; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(ellipse 44% calc(var(--fw) * .42) at 50% calc(var(--fw) * .3), color-mix(in srgb, var(--glow) 24%, transparent), transparent 74%),
+    linear-gradient(180deg, transparent, rgba(6, 11, 14, .88) calc(var(--fw) * .34), var(--black) calc(var(--fw) * .6));
+}
+/* The article has no box of its own on a wide screen: its window stands in the lineup and its words sit under it. */
+.win { display: contents; }
+.win-box {
+  position: absolute; left: 50%; bottom: 0; width: var(--fw); margin-left: calc(var(--fw) / -2);
+  transform: translate(var(--x, 0), var(--y, 0)) scale(var(--k, 1)); transform-origin: 50% 100%;
+  z-index: var(--z, 1); cursor: pointer;
+}
+.motion .win-box { transition: transform .5s var(--out), opacity .3s var(--out); }
+.win[data-pos="0"]  { --z: 5; }
+.win[data-pos="0"] .win-box { cursor: default; }
+.win[data-pos="-1"] { --k: .68; --x: calc(var(--fw) * -.82); --y: calc(var(--fw) * -.11); --z: 4; --dim: .12; --beam: 1; }
+.win[data-pos="1"]  { --k: .68; --x: calc(var(--fw) *  .82); --y: calc(var(--fw) * -.11); --z: 4; --dim: .12; --beam: 1; }
+.win[data-pos="-2"] { --k: .52; --x: calc(var(--fw) * -1.38); --y: calc(var(--fw) * -.2); --z: 3; --dim: .24; --beam: 1; }
+.win[data-pos="2"]  { --k: .52; --x: calc(var(--fw) *  1.38); --y: calc(var(--fw) * -.2); --z: 3; --dim: .24; --beam: 1; }
+.win[data-pos="off"] { --k: .5; --z: 1; }
+.win[data-pos="off"] .win-box { opacity: 0; pointer-events: none; }
+/* A window that goes round the back does not fly across the stage. It fades in at its new place. */
+.win.is-wrap .win-box { transition: none; animation: win-in .45s var(--out) both; }
+@keyframes win-in { from { opacity: 0; } to { opacity: 1; } }
+
+.win-frame {
+  position: relative; display: block; padding: var(--pad) var(--pad) 0; border-radius: calc(var(--fw) * .034);
+  background: linear-gradient(180deg, var(--frame), var(--frame-2));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .16),
+    0 2px 4px rgba(3, 6, 8, .5),
+    0 calc(var(--fw) * .04) calc(var(--fw) * .09) calc(var(--fw) * -.02) rgba(3, 6, 8, .8),
+    0 0 calc(var(--fw) * .2) calc(var(--fw) * -.03) color-mix(in srgb, var(--glow) 58%, transparent);
+}
+/* every window throws a little of its own light up the wall */
+.win-box::before {
+  content: ""; position: absolute; left: 4%; right: 4%; bottom: 60%; height: 95%; z-index: -1; pointer-events: none;
+  background: linear-gradient(0deg, color-mix(in srgb, var(--glow) 52%, transparent), transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 32%, #000 68%, transparent);
+          mask-image: linear-gradient(90deg, transparent, #000 32%, #000 68%, transparent);
+  opacity: var(--beam, 0);
+}
+/* its own light on the floor */
+.win-frame::before {
+  content: ""; position: absolute; left: -12%; right: -12%; bottom: calc(var(--fw) * -.07); height: calc(var(--fw) * .14); z-index: -1;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--glow) 62%, transparent), transparent);
+}
+/* windows behind stand out of the light */
+.win-frame::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; background: var(--black); opacity: var(--dim, 0); pointer-events: none;
+}
+.motion .win-frame::after, .motion .win-box::before { transition: opacity .5s var(--out); }
+/* a window behind answers the pointer: it steps into the light */
+@media (hover: hover) { .win:not([data-pos="0"]) .win-box:hover .win-frame::after { opacity: 0; transition-duration: .15s; } }
+.win-screen {
+  display: block; aspect-ratio: 16 / 10; overflow: hidden; border-radius: calc(var(--fw) * .034 - var(--pad)); background: var(--screen);
+}
+.win-screen img { width: 100%; height: 100%; object-fit: cover; }
+.win[data-build="datadecks"] .win-screen { padding: 6.2% 5%; background: radial-gradient(ellipse at 50% 0%, #2440B8, #17233D 70%); }
+.win[data-build="datadecks"] .win-screen img { object-fit: contain; border-radius: 3px; box-shadow: 0 2px 5px rgba(5, 9, 20, .5), 0 14px 28px -8px rgba(5, 9, 20, .7); }
+.win-name {
+  height: var(--plate); display: grid; place-items: center;
+  font-size: calc(var(--fw) * .058); line-height: 1; color: var(--ink);
+}
+.win-name .art { position: relative; top: .05em; }   /* capitals sit a hair high in their em: this evens the space */
+
+/* The words about the build on stage: its kind, one sentence, a link. All five sit in the same place,
+   so nothing moves when the build changes. */
+.win-says {
+  position: absolute; left: 0; right: 0; top: calc(100% + var(--s) * 1.3); padding: 0 20px;
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  opacity: 0; visibility: hidden;
+}
+.motion .win-says { transition: opacity .2s var(--out), visibility 0s .2s; }
+.win[data-pos="0"] .win-says { opacity: 1; visibility: visible; }
+.motion .win[data-pos="0"] .win-says { transition: opacity .3s var(--out) .2s, visibility 0s; }
+.win-says .kind { color: color-mix(in srgb, var(--glow) 16%, var(--cream)); padding-left: .12em; }   /* the last letter's spacing would pull it off the axis */
+/* A sentence runs about 65 characters to a line at most, so a long one takes two lines. Two lines are held
+   for every build and the sentence sits in the middle of them, so the link under it never moves. */
+.win-does { margin-top: 8px; max-width: 33em; min-height: 2.9em; display: flow-root; align-content: center; text-wrap: balance;
+  font: 400 clamp(15px, calc(var(--s) * 1.12), 20px)/1.45 var(--body); color: var(--cream); }
+.win-live, .row-link, .band-link {
+  display: inline-grid; place-items: center; min-height: 44px; padding: 0 2px;
+  font: 600 13px/1 var(--body); letter-spacing: .13em; text-transform: uppercase;
+  background: linear-gradient(currentColor, currentColor) 50% calc(50% + 13px) / 100% 1px no-repeat;
+  transition: background-size .15s var(--out);
+}
+.win-live { margin-top: 4px; padding-left: calc(2px + .13em); color: var(--cream); }
+.win-live:hover, .row-link:hover, .band-link:hover { background-size: 100% 2px; }
+
+/* One dot per build. A dot is a fixed 44 px target: only the mark inside it changes. */
+.dots { position: relative; z-index: 2; display: flex; justify-content: center; }
+.dot { width: 44px; height: 44px; padding: 0; border: 0; background: none; display: grid; place-items: center; cursor: pointer; }
+.dot i { display: block; width: 26px; height: 6px; border-radius: 3px; background: rgba(242, 238, 227, .34); transform: scaleX(.24); }
+.motion .dot i { transition: transform .25s var(--out), background-color .25s var(--out); }
+.dot:hover i { background: rgba(242, 238, 227, .6); }
+.dot[aria-pressed="true"] i { transform: none; background: var(--glow); }
+
+/* ───────── In progress: off the page until its four pictures exist (see index.html) ───────── */
+.progress { background: var(--cream); color: var(--navy); padding: clamp(72px, calc(var(--s) * 7.5), 140px) 24px; }
+.progress-in { max-width: 1120px; margin: 0 auto; }
+.hung { margin-top: clamp(32px, calc(var(--s) * 3.4), 56px); display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(14px, calc(var(--s) * 1.6), 26px); }
+/* a print in a white mat */
+.hang { margin: 0; padding: 10px 10px 18px; background: var(--white); border-radius: 6px; display: grid; grid-template-rows: auto auto auto 1fr; text-align: center;
+  box-shadow: 0 1px 2px rgba(27, 41, 56, .12), 0 16px 32px -14px rgba(27, 41, 56, .3); }
+.hang img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; border-radius: 2px; }
+.hang-name { margin-top: 16px; font-size: clamp(19px, calc(var(--s) * 1.5), 24px); line-height: 1.15; }
+.hang .kind { margin-top: 6px; color: var(--slate); padding: 0 4px; }   /* every label is one line, so the four sentences start level. A two-line label needs min-height: 2.8em here */
+.hang-line { margin-top: 8px; padding: 0 6px; text-wrap: balance; font: 400 14.5px/1.5 var(--body); }
+
+/* ───────── About: one photo and seven facts, in one block ─────────
+   The photo is a square on the left. The facts are tiles on the right, four rows that share the photo's
+   height, so the block is one filled rectangle. In each tile the title sits right above its own line,
+   on the same left edge, and the pair sits in the middle of the tile. */
+.about { background: radial-gradient(ellipse 58% 62% at 50% 44%, #F8F5EC 0%, var(--cream) 78%); color: var(--navy); padding: clamp(72px, calc(var(--s) * 7.5), 140px) 24px; }
+.about-in { max-width: calc(var(--s) * 81); margin: 0 auto; }
+.about-grid { margin-top: clamp(32px, calc(var(--s) * 3.4), 56px); display: grid; grid-template-columns: minmax(0, 1.18fr) minmax(0, 1fr); gap: 14px; }
+.print { width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; border-radius: 20px;
+  box-shadow: 0 1px 2px rgba(27, 41, 56, .18), 0 6px 12px -4px rgba(27, 41, 56, .16), 0 30px 50px -20px rgba(27, 41, 56, .4); }
+.facts { display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: 1fr; gap: 14px; }
+/* Every tile's title sits at the same spot, near the top. Its lines sit in the middle of the space below the title. */
+.fact { min-width: 0; display: grid; grid-template-rows: auto 1fr; padding: 16px 18px 0; background: var(--white); border-radius: 16px;
+  box-shadow: 0 1px 2px rgba(27, 41, 56, .08), 0 12px 24px -12px rgba(27, 41, 56, .22); }
+.fact--wide { grid-column: 1 / -1; }
+.fact dt { align-self: start; font: 600 12px/1.5 var(--body); letter-spacing: .13em; text-transform: uppercase; color: var(--slate); }
+.fact dd { align-self: center; margin: 0; padding: 11px 0; font: 400 16px/1.45 var(--body); }
+/* in a tile, a list reads one item to a line, so no dot is left hanging at a line's end */
+.fact .ph { display: block; white-space: normal; text-wrap: balance; }
+.fact .sep { display: none; }
+/* a school shows its full name on a wide screen and its short name on a phone */
+.fact .short { display: none; }
+/* On a narrower screen the tiles would have to squeeze their words, so the photo goes on top. */
+@media (max-width: 1339px) {
+  .about-in { max-width: 620px; }
+  .about-grid { grid-template-columns: 1fr; }
+  .facts { grid-auto-rows: auto; }
+  .fact { padding-top: 16px; padding-bottom: 0; }
+}
+
+/* ───────── Contact: one yellow card on the dark, three keys on it ───────── */
+.find {
+  position: relative; isolation: isolate; overflow: clip; display: grid; place-items: center;
+  padding: clamp(64px, calc(var(--s) * 7.4), 130px) 20px clamp(72px, calc(var(--s) * 8.4), 150px);
+  background: linear-gradient(180deg, #0D161E 0%, #16222F 48%, var(--black) 100%);
+}
+/* the card's own light, pooled on the floor under it */
+.find::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: radial-gradient(ellipse calc(var(--s) * 46) 46% at 50% 74%, rgba(251, 169, 54, .26), transparent 72%);
+}
+.find-card {
+  width: min(100%, calc(var(--s) * 72)); overflow: hidden; border-radius: 28px; color: var(--navy); text-align: center;
+  --top: clamp(40px, calc(var(--s) * 4.8), 76px);
+  padding: var(--top) clamp(18px, calc(var(--s) * 4), 60px) 0;
+  background: linear-gradient(180deg, #FFB84F 0%, var(--yellow) 42%, #F5A02C 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .5), 0 2px 4px rgba(3, 6, 8, .45), 0 34px 60px -22px rgba(3, 6, 8, .8), 0 0 110px -26px rgba(251, 169, 54, .5);
+}
+.find-links { margin-top: clamp(24px, calc(var(--s) * 2.8), 44px); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(10px, calc(var(--s) * 1.2), 18px); }
+/* a key: a navy tile that lifts under the pointer and gives under a press */
+.find-link {
+  display: flex; align-items: center; justify-content: center; gap: .42em; height: clamp(64px, calc(var(--s) * 6.2), 92px); border-radius: 18px;
+  font-size: clamp(22px, calc(var(--s) * 2.05), 30px); line-height: 1; color: var(--cream);
+  background: linear-gradient(180deg, #25374C 0%, var(--navy) 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14), 0 1px 2px rgba(27, 41, 56, .45), 0 14px 22px -10px rgba(27, 41, 56, .7);
+  transition: transform .15s var(--out), box-shadow .15s var(--out);
+}
+.find-link .art { position: relative; top: .05em; }
+.find-link .go { width: .6em; height: .6em; opacity: .72; transition: transform .15s var(--out); }
+@media (hover: hover) {
+  .find-link:hover { transform: translateY(-3px); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18), 0 2px 3px rgba(27, 41, 56, .45), 0 22px 30px -12px rgba(27, 41, 56, .8); }
+  .find-link:hover .go { transform: translate(2px, -2px); }
+}
+.find-link:active { transform: scale(.98); }
+/* the headline's capitals start a little under the top of its line, so the space under the keys is topped up to match */
+.find-card .strip { margin: calc(var(--top) + clamp(30px, calc(var(--s) * 3.5), 70px) * .25) calc(clamp(18px, calc(var(--s) * 4), 60px) * -1) 0; --strip: var(--navy); }
+
+/* ───────── Footer ───────── */
+.foot { background: var(--black); color: rgba(242, 238, 227, .72); text-align: center; padding: 26px 20px; font: 400 13px/1.5 var(--body); }
+
+/* ───────── The shell for every page after the home page ─────────
+   A short navy band with the page title and a strip of his pattern, then a cream reading area.
+   The band and the strip run edge to edge. The words keep to a column in the middle. */
+.page { background: var(--cream); }
+.band {
+  position: relative; isolation: isolate; overflow: clip; text-align: center; color: var(--cream);
+  padding-top: calc(var(--menu-h) + clamp(26px, calc(var(--s) * 3), 56px));
+  background: radial-gradient(ellipse calc(var(--s) * 54) 90% at 50% 8%, rgba(96, 118, 144, .3), transparent 72%), linear-gradient(180deg, var(--black) 0%, #111B26 62%, var(--navy) 100%);
+}
+.band-title { padding: 0 20px; font-size: clamp(40px, calc(var(--s) * 5), 96px); line-height: 1; }
+.band-line { margin-top: clamp(12px, calc(var(--s) * 1.1), 20px); padding: 0 20px; font: 400 clamp(15px, calc(var(--s) * 1.2), 21px)/1.45 var(--body); color: rgba(242, 238, 227, .86); }
+.band .strip { --strip: var(--cream); margin-top: clamp(34px, calc(var(--s) * 3.6), 64px); }
+.band--tall { min-height: calc(100vh - 71px); display: flex; flex-direction: column; justify-content: center; padding-bottom: 0; }
+.band--tall .strip { margin-top: auto; }
+.band--tall .band-title { margin-top: auto; }
+
+.read { background: radial-gradient(ellipse 56% 520px at 50% 300px, #F8F5EC 0%, var(--cream) 80%); color: var(--navy); padding: clamp(40px, calc(var(--s) * 4.6), 84px) 20px clamp(64px, calc(var(--s) * 7), 128px); }
+.read-in { max-width: calc(var(--s) * 66); margin: 0 auto; display: grid; gap: clamp(36px, calc(var(--s) * 3.8), 60px); }
+.group { min-width: 0; }
+.group-name { text-align: center; padding: 0 16px; font-size: clamp(22px, calc(var(--s) * 1.9), 32px); line-height: 1.15; }   /* centered over its group, at his word */
+.rows, .names { margin-top: 14px; padding: 4px clamp(20px, calc(var(--s) * 2.4), 36px); background: var(--white); border-radius: 16px;
+  box-shadow: 0 1px 2px rgba(27, 41, 56, .08), 0 14px 30px -14px rgba(27, 41, 56, .2); }
+/* One row: a picture, then its words in one stack on one left edge: the name, a small label for its
+   kind, one line, a link. A case study or a post fits the same parts. */
+/* The picture spans the row. The words stay in one tight stack beside its middle: the two flexible rows take up the slack. */
+.row { display: grid; grid-template-columns: clamp(180px, 29%, 270px) minmax(0, 1fr); grid-template-rows: 1fr auto auto auto auto 1fr; column-gap: clamp(20px, calc(var(--s) * 2.4), 36px); justify-items: start; padding: 24px 0; }
+.row + .row { border-top: 1px solid rgba(27, 41, 56, .1); }
+/* the build's own window, small, in its own colors */
+.row-pic { grid-column: 1; grid-row: 1 / -1; align-self: center; justify-self: stretch; display: block; padding: 5px; border-radius: 12px; background: linear-gradient(180deg, var(--frame), var(--frame-2));
+  box-shadow: 0 1px 2px rgba(27, 41, 56, .2), 0 14px 24px -10px rgba(27, 41, 56, .45); }
+.row-pic img { width: 100%; height: auto; aspect-ratio: 16 / 10; object-fit: cover; border-radius: 7px; }
+.row[data-build="datadecks"] .row-pic img { object-fit: contain; padding: 6% 5%; background: radial-gradient(ellipse at 50% 0%, #2440B8, #17233D 70%); }
+.row-name { grid-column: 2; grid-row: 2; font-size: clamp(22px, calc(var(--s) * 1.9), 28px); line-height: 1.15; }
+.row .kind { grid-column: 2; grid-row: 3; margin-top: 6px; color: var(--slate); }
+.row-line { grid-column: 2; grid-row: 4; margin-top: 6px; max-width: 32.5em; text-wrap: balance; font: 400 16px/1.5 var(--body); }   /* about 65 characters to a line, no single word left alone on a last line */
+.row-link { grid-column: 2; grid-row: 5; margin-top: 2px; color: var(--navy); }
+/* His favorite tools by others: one card for work, one for fun, both one size. Each card is the page in
+   small: a navy top with its label and a strip of his pattern, then the names on white. Every name is
+   centered, and the widest comes first. */
+.favs { margin-top: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.fav { overflow: hidden; background: var(--white); border-radius: 16px; text-align: center;
+  box-shadow: 0 1px 2px rgba(27, 41, 56, .08), 0 14px 30px -14px rgba(27, 41, 56, .2); }
+.fav-top { padding-top: 17px; background: linear-gradient(180deg, #25374C 0%, var(--navy) 100%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14); }
+.fav .kind { color: var(--cream); font-size: 13px; padding-left: .12em; }
+.fav-top .strip { --strip: var(--yellow); height: 20px; margin-top: 15px; }
+.fav .names { margin: 0; padding: 14px 16px 16px; background: none; border-radius: 0; box-shadow: none; display: block; }
+.names li { display: flex; align-items: center; justify-content: center; min-height: 48px; font-size: clamp(20px, calc(var(--s) * 1.6), 24px); line-height: 1; }
+.names .art { position: relative; top: .03em; }   /* capitals sit a hair high in their em: this evens the space */
+
+/* ───────── Phone ───────── */
+@media (max-width: 699px) {
+  :root { --s: 1vw; --menu-h: 56px; }
+  .menu { padding: 0 20px; }
+
+  /* The name stacks on two lines. */
+  .hero { background: linear-gradient(180deg, var(--black) 0%, #0B131A 20%, #131E28 50%, #0C141B 80%, var(--black) 100%); }
+  .hero-show::before { flex: 1 1 0; }
+  .hero-show::after { flex: 1.35 1 0; }
+  .marquee { --word-h: calc((100vw - 40px) / 5.5205); display: grid; justify-items: center; row-gap: calc(var(--word-h) * .3); }
+  .marquee::before {
+    top: 50%; height: 170vw; margin-top: -85vw;
+    background:
+      radial-gradient(ellipse 60% 30% at 50% 46%, rgba(122, 140, 160, .28), transparent 72%),
+      radial-gradient(ellipse 120% 46% at 50% 48%, rgba(58, 78, 100, .56), transparent 74%);
+  }
+  .name { position: static; display: contents; -webkit-mask-image: none; mask-image: none; padding: 0; }
+  .word--thomas, .word--strider { grid-column: 1; justify-self: center; }
+  .word--thomas { grid-row: 1; }
+  .word--strider { grid-row: 2; }
+  /* Phone only, at his word (2026-10-20): the title drops "| AI Development" so it fits one line. */
+  .title .wide, .title .art > svg:nth-of-type(3) { display: none; }
+  .title { margin-top: 22px; font-size: clamp(15px, 4.7vw, 22px); line-height: 1.45; }
+  .rule { margin-top: 22px; }
+  .line { margin-top: 18px; font-size: 16px; }
+  .floor { height: 26%; -webkit-mask-size: auto, 150px auto; mask-size: auto, 150px auto; }
+
+  /* The builds: a row to swipe. The window in the middle is on stage. */
+  .stage {
+    padding: 56px 0 28px;
+    /* the light of the build on stage, behind the row */
+    background:
+      radial-gradient(ellipse 130% 30% at 50% 46%, color-mix(in srgb, var(--glow) 34%, transparent), transparent 72%),
+      linear-gradient(180deg, var(--black) 0%, #0A1118 22%, #142029 52%, #0E161E 74%, var(--black) 100%);
+  }
+  .stage::after { flex: 1.3 1 0; }
+  .say { font-size: clamp(26px, 9vw, 40px); line-height: 1.16; }
+  .lineup {
+    --fw: 80vw; height: auto; margin: 30px 0 0; display: flex; gap: 3vw; align-items: flex-start;
+    overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: none;
+    padding: 4px 10vw 0; scroll-padding: 0 10vw;
+  }
+  .lineup::-webkit-scrollbar { display: none; }
+  .win, .win[data-pos] { display: block; order: var(--o); flex: none; width: var(--fw); scroll-snap-align: center; scroll-snap-stop: always; }
+  .win[data-pos="0"] { scroll-initial-target: nearest; }
+  .win-box, .win[data-pos] .win-box { position: relative; left: auto; bottom: auto; margin: 0; transform: none; opacity: 1; pointer-events: auto; cursor: default; animation: none; }
+  .win-says { position: static; padding: 0; margin-top: 16px; }
+  .win-does { font-size: clamp(13.5px, 4vw, 15px); line-height: 1.5; min-height: 4.5em; max-width: none; }
+  .win-live { margin-top: 0; }
+  .win-frame::before, .lineup::before, .lineup::after, .win-box::before { display: none; }
+
+  .progress { padding: 64px 20px; }
+  /* one print at a time down the page, all one size */
+  .hung { grid-template-columns: 1fr; gap: 16px; }
+  .hang { padding: 12px 12px 22px; }
+  .hang .kind { min-height: 0; }
+  .hang-line { max-width: 26em; margin-left: auto; margin-right: auto; text-wrap: balance; }
+  .hang-line { font-size: 15px; }
+
+  .about { padding: 64px 20px; }
+  .about-grid { gap: 12px; }
+  .facts { grid-template-columns: 1fr; gap: 10px; }
+  /* on a phone each tile's words sit in the middle of the tile, so no side of it is left empty */
+  .fact { padding: 16px 18px 0; text-align: center; justify-items: center; }
+  .fact dd { font-size: 16px; }
+  .fact .long { display: none; }
+  .fact .short { display: inline; }
+
+  .find { padding: 56px 16px 64px; }
+  .find-card { border-radius: 22px; --top: 36px; padding: 36px 16px 0; }
+  .find .head { font-size: clamp(24px, 7.6vw, 30px); }
+  .find-links { grid-template-columns: 1fr; gap: 10px; }
+  .find-link { height: 64px; font-size: 24px; border-radius: 16px; }
+  .find-link .go { display: none; }   /* no arrow on a phone, at his word, so each name sits in the middle of its key */
+  .find-card .strip { margin: 43px -16px 0; }
+
+  .read { padding: 36px 16px 64px; }
+  /* on a phone each row is centered: picture, name, kind, line, link */
+  .row { grid-template-columns: 1fr; grid-template-rows: none; justify-items: center; text-align: center; padding: 26px 0 18px; }
+  .row-pic { grid-column: 1; grid-row: auto; justify-self: center; width: min(100%, 320px); margin-bottom: 18px; }
+  .row-name, .row .kind, .row-line, .row-link { grid-column: 1; grid-row: auto; }
+  .row-line { max-width: 26em; text-wrap: balance; }   /* no single word left alone on a last line */
+  .row-link { margin-top: 8px; }
+  .favs { grid-template-columns: 1fr; gap: 12px; }
+}
+/* The narrowest phones: a long phrase may wrap rather than run off the window. */
+@media (max-width: 359px) { .win-does .ph { white-space: normal; display: inline; } }
